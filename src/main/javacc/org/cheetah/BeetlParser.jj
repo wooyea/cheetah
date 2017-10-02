@@ -1,0 +1,137 @@
+
+options
+{
+  JDK_VERSION = "1.7";
+  STATIC = false;
+}
+
+PARSER_BEGIN(BeetlParser)
+
+package org.cheetah;
+
+import org.cheetah.core.*;
+
+public class BeetlParser {
+
+  private ParserContext context;
+
+  public void setContext(ParserContext context) {
+    this.context = context;
+  }
+
+  public static void main(String args[]) throws ParseException {
+    BeetlParser parser = new BeetlParser(System.in);
+  }
+
+}
+
+PARSER_END(BeetlParser)
+
+SKIP :
+{
+  " "
+| "\t"
+| "\n"
+| "\r"
+
+}
+
+
+/* SEPARATORS */
+
+TOKEN :
+{
+  < DOLLAR: "$" >
+|  < LPAREN: "(" >
+| < RPAREN: ")" >
+| < LBRACE: "{" >
+| < RBRACE: "}" >
+| < LBRACKET: "[" >
+| < RBRACKET: "]" >
+| < SEMICOLON: ";" >
+//| < COMMA: "," >
+| < DOT: "." >
+| < AT: "@" >
+}
+
+/* OPERATORS */
+
+TOKEN :
+{
+  < ASSIGN: "=" >
+| < LT: "<" >
+| < BANG: "!" >
+| < TILDE: "~" >
+| < HOOK: "?" >
+| < COLON: ":" >
+| < EQ: "==" >
+| < LE: "<=" >
+| < GE: ">=" >
+| < NE: "!=" >
+| < SC_OR: "||" >
+| < SC_AND: "&&" >
+| < INCR: "++" >
+| < DECR: "--" >
+| < PLUS: "+" >
+| < MINUS: "-" >
+| < STAR: "*" >
+| < SLASH: "/" >
+| < BIT_AND: "&" >
+| < BIT_OR: "|" >
+| < XOR: "^" >
+| < REM: "%" >
+| < LSHIFT: "<<" >
+| < PLUSASSIGN: "+=" >
+| < MINUSASSIGN: "-=" >
+| < STARASSIGN: "*=" >
+| < SLASHASSIGN: "/=" >
+| < ANDASSIGN: "&=" >
+| < ORASSIGN: "|=" >
+| < XORASSIGN: "^=" >
+| < REMASSIGN: "%=" >
+| < LSHIFTASSIGN: "<<=" >
+| < RSIGNEDSHIFTASSIGN: ">>=" >
+| < RUNSIGNEDSHIFTASSIGN: ">>>=" >
+| < ELLIPSIS: "..." >
+}
+
+TOKEN :
+{
+
+  < VAR_PATH: <LETTER>(<NUMBER_LETTER>)* >
+  | < #LETTER: ["A"-"Z", "a"-"z", "_"] >
+  | < #NUMBER_LETTER: ["0"-"9", "A"-"Z", "a"-"z", "_", "."] >
+}
+
+
+String parse() :
+{
+
+    Token varPath = null;
+	StringBuffer sbuf = new StringBuffer();
+	String asdf = new String();
+}
+{
+  ( <DOLLAR><LBRACE>varPath=<VAR_PATH><RBRACE>  { sbuf.append(var(varPath)); }
+  )*
+
+  <EOF>
+
+  {return sbuf.toString();}
+
+}
+
+String var(Token varPath) :
+{
+}
+{
+
+//    varPath=<VAR_PATH>
+    {
+        System.out.println(context.getValueByPath(varPath.image));
+
+
+//        return context.getValueByPath(varPath.image).toString();
+return "";
+    }
+}
