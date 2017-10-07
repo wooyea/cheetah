@@ -1,6 +1,9 @@
 .gradle
-/build/
-/out
+build/
+out
+
+
+
 
 # Intellij idea project file dir
 .idea
