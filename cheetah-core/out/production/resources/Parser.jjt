@@ -1,0 +1,105 @@
+options
+{
+    /** The default package for this parser kit */
+    NODE_PACKAGE="org.cheetah.parser.beetl";
+
+    /** A source file will  be generated for each non-terminal */
+    MULTI=true;
+
+    /**
+     * Each node will have access to the parser, I did this so
+     * some global information can be shared via the parser. I
+     * think this will come in handly keeping track of
+     * context, and being able to push changes back into
+     * the context when nodes make modifications to the
+     * context by setting properties, variables and
+     * what not.
+     */
+    NODE_USES_PARSER=true;
+
+    /**
+     * The parser must be non-static in order for the
+     * above option to work, otherwise the parser value
+     * is passed in as null, which isn't all the useful ;)
+     */
+    STATIC=false;
+
+    /**
+     * Enables the use of a visitor that each of nodes
+     * will accept. This way we can separate the logic
+     * of node processing in a visitor and out of the
+     * nodes themselves. If processing changes then
+     * the nothing has to change in the node code.
+     */
+    VISITOR=true;
+
+    /**
+     * Declare that we are accepting unicode input and
+     * that we are using a custom character stream class
+     * Note that the char stream class is really a slightly
+     * modified ASCII_CharStream, as it appears we are safe
+     * because we only deal with pre-encoding-converted
+     * Readers rather than raw input streams.
+     */
+    UNICODE_INPUT=true;
+    USER_CHAR_STREAM=true;
+
+    /**
+     *  for debugging purposes.  Keep false
+     */
+    DEBUG_PARSER = false;
+    DEBUG_LOOKAHEAD = false;
+    DEBUG_TOKEN_MANAGER = false;
+}
+
+PARSER_BEGIN(BeetlParser)
+package org.cheetah.core.parser.beetl;
+
+import java.io.*;
+import java.util.*;
+import org.slf4j.Logger;
+
+public class BeetlParser
+{
+
+}
+
+PARSER_END(BeetlParser)
+
+TOKEN_MGR_DECLS:
+{
+    private int fileDepth = 0;
+
+    private int lparen = 0;
+    private int rparen = 0;
+
+    List stateStack = new ArrayList(50);
+
+    public boolean debugPrint = false;
+
+    private boolean inReference;
+    private boolean inComment;
+    public  boolean inSet;
+
+}
+
+/** ------------------------------------------------------------------------
+ *  Tokens
+ *  ------------------------------------------------------------------------
+ */
+
+
+
+SimpleNode simpleLang() #Root :
+{}
+{ addExpr() <EOF> { return jjtThis; }}
+
+void addExpr()          :             {}  { integerLiteral()
+
+                                          ( "+" integerLiteral() #Add(2) )? }
+
+void integerLiteral() #IntLiteral :  {}  { <INT> }
+
+SKIP  : { " " | "\t" | "\n" | "\r" }
+
+TOKEN : { < INT : ( ["0" - "9"] )+ > }

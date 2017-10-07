@@ -1,10 +1,10 @@
-
 buildscript {
     repositories {
+        mavenLocal()
         mavenCentral()
     }
     dependencies {
-        classpath 'org.junit.platform:junit-platform-gradle-plugin:1.0.0'
+        classpath 'org.junit.platform:junit-platform-gradle-plugin:1.0.1'
     }
 }
 
@@ -13,51 +13,100 @@ plugins {
 }
 
 
-apply plugin: 'java'
-apply plugin: 'org.junit.platform.gradle.plugin'
-
-
-
 group 'org.cheetah'
 version '1.0-SNAPSHOT'
 
-sourceCompatibility = 1.8
+subprojects {
 
-repositories {
-    mavenCentral()
+    apply plugin: 'java'
+
+
+    task wrapper(type: Wrapper) {
+        gradleVersion = '4.2.1'
+    }
+
+    sourceCompatibility = 1.8
+
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+
 }
 
-sourceSets {
-    main {
-        java {
-            srcDirs = ['src/main/java', "build/generated/javacc"]
+project(":cheetah-core") {
+
+    apply plugin: 'org.junit.platform.gradle.plugin'
+
+    apply plugin: "ca.coglinc.javacc"
+    apply plugin: 'org.junit.platform.gradle.plugin'
+
+
+    sourceSets {
+        main {
+            java {
+                srcDirs = ['src/main/java', "build/generated/javacc"]
+            }
         }
+    }
+
+    dependencies {
+        compile("com.esotericsoftware:reflectasm:1.11.3")
+
+        testCompile("org.junit.jupiter:junit-jupiter-api:5.0.0")
+        testCompile("org.testng:testng:6.11")
+
+        testRuntime("org.junit.jupiter:junit-jupiter-engine:5.0.0")
+
+    }
+
+    compileJavacc {
+        arguments = [grammar_encoding: 'UTF-8', static: 'false']
+        inputDirectory = file('src/main/javacc')
+        outputDirectory = file(project.buildDir.absolutePath + '/generated/javacc')
+    }
+
+    compileJjtree {
+        inputDirectory = file('src/main/jjtree')
+        outputDirectory = file(project.buildDir.absolutePath + '/generated/jjtree')
+        arguments = [grammar_encoding: 'UTF-8', static: 'true']
+    }
+
+//    junitPlatform {
+//        platformVersion '1.0.0'
+//        logManager 'org.apache.logging.log4j.jul.LogManager'
+//        reportsDir file('build/test-results/junit-platform') // this is the default
+//        // enableStandardTestTask true
+//        // selectors (optional)
+//        // filters (optional)
+//    }
+
+}
+
+project(":cheetah-beetl") {
+
+    dependencies {
+//        testCompile("org.junit.jupiter:junit-jupiter-api:5.0.0")
+//        testRuntime("org.junit.jupiter:junit-jupiter-engine:5.0.0")
+        testCompile("org.testng:testng:6.11")
+        testCompile("junit:junit:4.12")
+    }
+
+    test {
+        // enable TestNG support (default is JUnit)
+//    useTestNG {
+//        suites 'src/main/resources/testng.xml'
+//    }
+
+//        useJunit()
+
     }
 }
 
-compileJavacc {
-    arguments = [grammar_encoding: 'UTF-8', static: 'false']
-    inputDirectory = file('src/main/javacc')
-    outputDirectory = file(project.buildDir.absolutePath + '/generated/javacc')
-}
-
-
-dependencies {
-    testCompile("org.junit.jupiter:junit-jupiter-api:5.0.0")
-    testRuntime("org.junit.jupiter:junit-jupiter-engine:5.0.0")
-    compile("com.esotericsoftware:reflectasm:1.11.3")
-}
-
-compileJjtree {
-    inputDirectory = file('src/main/jjtree')
-    outputDirectory = file(project.buildDir.absolutePath + '/generated/jjtree')
-    arguments = [grammar_encoding: 'UTF-8', static: 'true']
-}
-
-junitPlatform {
-    logManager 'org.apache.logging.log4j.jul.LogManager'
-    reportsDir file('build/test-results/junit-platform') // this is the default
-    // enableStandardTestTask true
-    // selectors (optional)
-    // filters (optional)
-}
+//junitPlatform {
+//    logManager 'org.apache.logging.log4j.jul.LogManager'
+//    reportsDir file('build/test-results/junit-platform') // this is the default
+//    // enableStandardTestTask true
+//    // selectors (optional)
+//    // filters (optional)
+//}
